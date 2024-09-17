@@ -8,7 +8,6 @@ public class Validator {
 
     public static String validField(String label  , String regex , String errorMessage) {
 
-
         while (true) {
             System.out.print(label);
             String input = scanner.next().trim();
