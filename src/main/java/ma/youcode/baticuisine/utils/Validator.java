@@ -6,8 +6,8 @@ public class Validator {
 
     private static final Scanner scanner = new Scanner(System.in);
 
+    // This function for validate Datatype (String)
     public static String validField(String label  , String regex , String errorMessage) {
-
 
         while (true) {
             System.out.print(label);
