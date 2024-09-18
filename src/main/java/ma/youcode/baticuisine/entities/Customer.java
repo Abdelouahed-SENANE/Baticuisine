@@ -1,6 +1,6 @@
 package ma.youcode.baticuisine.entities;
 
-public class Custumer {
+public class Customer {
 
     private String customerId;
     private String customerName;
