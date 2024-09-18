@@ -67,6 +67,8 @@ public class CostumerView {
         String customerAddress = Validator.validField("adresse du client ", null);
         String customerPhone = Validator.validField("telephone du client ", "^[0-9(.)-]+$");
         Boolean isProfesstional = Validator.validBoolean("un professional");
+        System.out.println(customerAddress);
+        System.exit(0);
 
         Custumer newCustomer = new Custumer();
         newCustomer.setCustomerName(customerName);
