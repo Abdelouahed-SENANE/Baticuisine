@@ -1,5 +1,8 @@
 package ma.youcode.baticuisine.views;
 
+import ma.youcode.baticuisine.entities.Custumer;
+import ma.youcode.baticuisine.services.CustomerService;
+import ma.youcode.baticuisine.services.implementations.CustomerServiceImp;
 import ma.youcode.baticuisine.utils.ChoiceOption;
 import ma.youcode.baticuisine.utils.Validator;
 
@@ -10,9 +13,11 @@ public class CostumerView {
     private static final int NUMBER_OPTIONS = 3;
     private static int option;
     private static final Scanner scanner;
+    private static final CustomerService customerService;
 
     static {
         scanner = new Scanner(System.in);
+        customerService = new CustomerServiceImp();
     }
 
     public static void view() {
@@ -39,6 +44,7 @@ public class CostumerView {
                     existCustomer();
                     break;
                 case 2:
+                    createCustomer();
                     break;
                 case 3:
                     System.out.println("Retour au menu précédent...");
@@ -53,7 +59,25 @@ public class CostumerView {
 
     public static void existCustomer() {
         System.out.println("Vous avez choisi de chercher un client existant.");
-        String name = Validator.validField("Veuillez entrer le nom du client : ", "[A-Za-z ]+", "Invalid name format. Please use only letters an spaces.");
-//        Service costumer
+
+    }
+
+    public static void createCustomer() {
+        String customerName = Validator.validField("nom du client", "[A-Za-z ]+");
+        String customerAddress = Validator.validField("adresse du client ", null);
+        String customerPhone = Validator.validField("telephone du client ", "^[0-9(.)-]+$");
+        Boolean isProfesstional = Validator.validBoolean("un professional");
+
+        Custumer newCustomer = new Custumer();
+        newCustomer.setCustomerName(customerName);
+        newCustomer.setAddress(customerAddress);
+        newCustomer.setPhone(customerPhone);
+        newCustomer.setProfessional(isProfesstional);
+
+        try {
+            customerService.addCustumer(newCustomer);
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
