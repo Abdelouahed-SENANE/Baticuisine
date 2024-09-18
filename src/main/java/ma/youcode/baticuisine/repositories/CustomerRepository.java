@@ -1,8 +1,9 @@
 package ma.youcode.baticuisine.repositories;
 
-import ma.youcode.baticuisine.entities.Custumer;
+import ma.youcode.baticuisine.entities.Customer;
 
 public interface CustomerRepository {
 
-    void save(Custumer custumer);
+    void save(Customer customer);
+    Customer findByName(String customerName);
 }
