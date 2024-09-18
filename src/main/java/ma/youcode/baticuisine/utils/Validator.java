@@ -11,7 +11,7 @@ public class Validator {
 
         while (true) {
             System.out.print("Veuillez entrer " + fieldName + " : ");
-            String input = scanner.next();
+            String input = scanner.nextLine().trim();
 
             if (input.isEmpty() || input == null) {
                 System.out.println("La saisie ne peut pas être vide. Veuillez réessayer.");
