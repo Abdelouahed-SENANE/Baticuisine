@@ -19,7 +19,7 @@ public class ProjectRepositoryImp implements ProjectRepository {
         UUID uuid = null;
         String SQL = "INSERT INTO projects (project_name , profit_margin , project_status , owner_customer_id) VALUES (?, ?, ?, ?)";
 
-        try(PreparedStatement pstmt = connection.prepareStatement(SQL)) {
+        try(PreparedStatement pstmt = connection.prepareStatement(SQL , Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, project.getProjectName());
             pstmt.setDouble(2, project.getProfitMargin());
             pstmt.setObject(3, ProjectStatus.ENCOURS, Types.OTHER);

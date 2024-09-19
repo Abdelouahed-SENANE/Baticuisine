@@ -1,5 +1,6 @@
 package ma.youcode.baticuisine.utils;
 
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Validator {
@@ -7,92 +8,114 @@ public class Validator {
     private static final Scanner scanner = new Scanner(System.in);
 
     public static String validField(String fieldName, String regex) {
-
         while (true) {
-            System.out.print("Veuillez entrer " + fieldName + " : ");
-            String input = scanner.nextLine().trim();
+            try {
+                System.out.print("Veuillez entrer " + fieldName + " : ");
+                String input = scanner.nextLine().trim();
 
-            if (input.isEmpty() || input == null) {
-                System.out.println("La saisie ne peut pas être vide. Veuillez réessayer.");
-                continue;
-            }
-            if ( regex != null && !regex.isEmpty() ) {
-                if (!input.matches(regex)) {
-                    System.out.println(fieldName + "est invalide. Veuillez respecter le format requis.");
+                if (input.isEmpty() || input == null) {
+                    System.out.println("La saisie ne peut pas être vide. Veuillez réessayer.");
                     continue;
                 }
+                if ( regex != null && !regex.isEmpty() ) {
+                    if (!input.matches(regex)) {
+                        System.out.println(fieldName + "est invalide. Veuillez respecter le format requis.");
+                        continue;
+                    }
+                }
+                return input;
+
+            }catch (Exception e) {
+                System.out.println("Une erreur est survenue. Veuillez réessayer.");
             }
-            return input;
         }
 
     }
     public static Double validDouble(String fieldName) {
         while (true) {
-            System.out.print("Veuillez entrer " + fieldName + " : ");
-            String input = scanner.nextLine().trim();
-            Double value = Double.parseDouble(input);
+            try{
+                System.out.print("Veuillez entrer " + fieldName + " : ");
+                String input = scanner.nextLine().trim();
+                Double value = Double.parseDouble(input);
 
-            if (value.isNaN() || input == null) {
-                System.out.println("La saisie ne peut pas être vide. Veuillez réessayer.");
-                continue;
+                if (value.isNaN() || input == null) {
+                    System.out.println("La saisie ne peut pas être vide. Veuillez réessayer.");
+                    continue;
+                }
+                return value;
+            }catch (Exception e){
+                System.out.println("Une erreur est survenue. Veuillez réessayer.");
             }
-            return value;
         }
     }
 
 
     public static Boolean validBoolean(String fieldName) {
         while (true) {
-            System.out.println( fieldName + " : ");
-            System.out.println("1 - Oui");
-            System.out.println("2 - Non");
-            Integer input = scanner.nextInt();
+            try {
+                System.out.println( fieldName + " : ");
+                System.out.println("1 - Oui");
+                System.out.println("2 - Non");
+                System.out.print("Votre choix: ");
 
-            if (input == null) {
-                System.out.println("La saisie ne peut pas être vide. Veuillez réessayer.");
-                continue;
+                Integer input = scanner.nextInt();
+                if (input == null) {
+                    System.out.println("La saisie ne peut pas être vide. Veuillez réessayer.");
+                    continue;
+                }
+                if (input <= 0 || input > 2) {
+                    System.out.println("La valeur saisie doit être 1 ou 2. Veuillez réessayer.");
+                    continue;
+                }
+                scanner.nextLine();
+                return (input == 1) ? true : false;
+            }catch (Exception e){
+                System.out.println("Une erreur est survenue. Veuillez réessayer.");
+                scanner.nextLine();
             }
-            if (input <= 0 || input > 2) {
-                System.out.println("La valeur saisie doit être 1 ou 2. Veuillez réessayer.");
-                continue;
-            }
-            scanner.nextLine();
-            return (input == 1) ? true : false;
         }
     }
 
     public static Boolean validQuestion(String fieldName) {
         while (true) {
-            System.out.print( fieldName + " : ");
-            Integer input = scanner.nextInt();
+            try{
+                System.out.print( fieldName + " : ");
+                Integer input = scanner.nextInt();
 
-            if (input == null) {
-                System.out.println("La saisie ne peut pas être vide. Veuillez réessayer.");
-                continue;
+                if (input == null) {
+                    System.out.println("La saisie ne peut pas être vide. Veuillez réessayer.");
+                    continue;
+                }
+                if (input <= 0 || input > 2) {
+                    System.out.println("La valeur saisie doit être 1 ou 2. Veuillez réessayer.");
+                    continue;
+                }
+                scanner.nextLine();
+                return (input == 1) ? true : false;
+            }catch (Exception e){
+                System.out.println("Une erreur est survenue. Veuillez réessayer.");
             }
-            if (input <= 0 || input > 2) {
-                System.out.println("La valeur saisie doit être 1 ou 2. Veuillez réessayer.");
-                continue;
-            }
-            scanner.nextLine();
-            return (input == 1) ? true : false;
         }
     }
     public static Double validCoeffcient(String fieldName) {
         while (true) {
-            System.out.print( "Veuillez entrer "+fieldName + " : ");
+            try{
+                System.out.print( "Veuillez entrer "+fieldName + " : ");
 
-            String input = scanner.nextLine().trim();
-            Double value = Double.parseDouble(input);
-            if (input == null) {
-                System.out.println("La saisie ne peut pas être vide. Veuillez réessayer.");
-                continue;
+                String input = scanner.nextLine().trim();
+                Double value = Double.parseDouble(input);
+                if (input == null) {
+                    System.out.println("La saisie ne peut pas être vide. Veuillez réessayer.");
+                    continue;
+                }
+                if (value < 1.0 || value > 2) {
+                    System.out.println("La valeur saisie doit être un coefficient entre 1.0 et 2. Veuillez réessayer.");
+                    continue;
+                }
+                return value;
+            }catch (Exception e) {
+                System.out.println("Une erreur est survenue. Veuillez réessayer.");
             }
-            if (value < 1.0 || value > 2) {
-                System.out.println("La valeur saisie doit être un coefficient entre 1.0 et 2. Veuillez réessayer.");
-                continue;
-            }
-            return value;
         }
     }
 
