@@ -16,7 +16,7 @@ public class CustomerServiceImp implements CustomerService {
     }
 
     @Override
-    public void addCustumer(Customer customer) {
+    public void addCustomer(Customer customer) {
         this.customerRepository.save(customer);
     }
     public Optional<Customer> getCustomerByName(String name) {

@@ -3,9 +3,10 @@ package ma.youcode.baticuisine.entities;
 public class Material extends  Component{
 
     private Double pricePerUnit;
-    private Integer quantity;
+    private Double quantity;
     private Double transportationCost;
     private Double qualityCoefficient;
+    public Material(){}
 
 
     public Double getPricePerUnit() {
@@ -20,7 +21,7 @@ public class Material extends  Component{
         return transportationCost;
     }
 
-    public Integer getQuantity() {
+    public Double getQuantity() {
         return quantity;
     }
 
@@ -32,7 +33,7 @@ public class Material extends  Component{
         this.qualityCoefficient = qualityCoefficient;
     }
 
-    public void setQuantity(Integer quantity) {
+    public void setQuantity(Double quantity) {
         this.quantity = quantity;
     }
 

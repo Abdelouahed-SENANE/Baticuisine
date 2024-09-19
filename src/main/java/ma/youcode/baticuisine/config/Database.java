@@ -15,7 +15,6 @@ public final class Database {
         try{
             Class.forName("org.postgresql.Driver");
             connection = DriverManager.getConnection(URL, USER, PASSWORD);
-            System.out.println("Database Connection Successful");
         }catch (SQLException e){
             System.out.println("Handle Queries SQL Exception ----> " + e.getMessage());
         } catch (ClassNotFoundException e) {

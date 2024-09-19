@@ -1,5 +1,7 @@
 package ma.youcode.baticuisine.entities;
 
+import java.util.List;
+
 public class Customer {
 
     private String customerId;
@@ -7,6 +9,10 @@ public class Customer {
     private String address;
     private String phone;
     private Boolean isProfessional;
+    private List<Project> projects;
+
+
+    public Customer(){}
 
     public Boolean getProfessional() {
         return isProfessional;
@@ -46,5 +52,13 @@ public class Customer {
 
     public void setProfessional(Boolean professional) {
         isProfessional = professional;
+    }
+
+    public List<Project> getProjects() {
+        return projects;
+    }
+
+    public void setProjects(List<Project> projects) {
+        this.projects = projects;
     }
 }

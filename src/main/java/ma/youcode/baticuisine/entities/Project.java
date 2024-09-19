@@ -2,19 +2,38 @@ package ma.youcode.baticuisine.entities;
 
 import ma.youcode.baticuisine.enums.ProjectStatus;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
 public class Project {
-    private String projectId;
+    private UUID projectId;
     private String projectName;
     private Double profitMargin;
-    private Double overallCost;
     private ProjectStatus projectStatus;
+    private Customer customer;
+    private Double surface;
+    private List<Component> components = new ArrayList<>();
 
-    public String getProjectId() {
-        return projectId;
+    public Project(){}
+
+    public void setSurface(Double surface) {
+        this.surface = surface;
     }
 
-    public Double getOverallCost() {
-        return overallCost;
+    public Double getSurface() {
+        return surface;
+    }
+
+    public void addComponent(Component component) {
+        this.components.add(component);
+    }
+    public List<Component> getComponents() {
+        return components;
+    }
+
+    public UUID getProjectId() {
+        return projectId;
     }
 
     public Double getProfitMargin() {
@@ -25,19 +44,23 @@ public class Project {
         return projectStatus;
     }
 
-    public String getProjectName() {
-        return projectName;
+    public Customer getCustomer() {
+        return customer;
     }
 
-    public void setOverallCost(Double overallCost) {
-        this.overallCost = overallCost;
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
+
+    public String getProjectName() {
+        return projectName;
     }
 
     public void setProfitMargin(Double profitMargin) {
         this.profitMargin = profitMargin;
     }
 
-    public void setProjectId(String projectId) {
+    public void setProjectId(UUID projectId) {
         this.projectId = projectId;
     }
 
