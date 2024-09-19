@@ -21,7 +21,7 @@ public class CostumerView {
         customerService = new CustomerServiceImp();
     }
 
-    public static void view() {
+    public static int view() {
 
         System.out.println("Souhaitez-vous chercher un client existant ou en ajouter un nouveau ? ");
         System.out.println(" ___________________________________");
@@ -33,45 +33,24 @@ public class CostumerView {
         System.out.println("| 3. Revenir au menu précédent      |");
         System.out.println("|___________________________________|");
         System.out.print(" Entrez votre choix : ");
-        option = ChoiceOption.getChoice(4);
+        return  ChoiceOption.getChoice(4);
     }
 
-    public static Menu run(Menu previousMenu) {
-
-        do {
-            view();
-            switch (option) {
-                case 1:
-                    existCustomer();
-                    break;
-                case 2:
-                    createCustomer();
-                    break;
-                case 3:
-                    System.out.println("Retour au menu précédent...");
-                    break;
-                default:
-                    System.out.print("Option invalide. Veuillez réessayer : ");
-            }
-        } while (option != NUMBER_OPTIONS);
-
-        return previousMenu;
-    }
-
-    public static void existCustomer() {
+    public static Optional<Customer> existCustomer() {
         System.out.println("Vous avez choisi de chercher un client existant.");
 
         String customerName = Validator.validField("nom du client recherche", "[A-Za-z ]+");
         Optional<Customer> customer = customerService.getCustomerByName(customerName);
-        customer.ifPresentOrElse(CostumerView::displayCard, () -> System.out.println("Customer not found"));
+        customer.ifPresentOrElse(CostumerView::displayCard, () -> System.out.println("Client non trouve"));
 
+        return customer;
     }
 
-    public static void createCustomer() {
+    public static Optional<Customer> createCustomer() {
         String customerName = Validator.validField("nom du client", "[A-Za-z ]+");
         String customerAddress = Validator.validField("adresse du client ", null);
         String customerPhone = Validator.validField("telephone du client ", "^[0-9(.)-]+$");
-        Boolean isProfesstional = Validator.validBoolean("un professional");
+        Boolean isProfesstional = Validator.validBoolean("si est un professional");
 
         Customer newCustomer = new Customer();
         newCustomer.setCustomerName(customerName);
@@ -80,11 +59,12 @@ public class CostumerView {
         newCustomer.setProfessional(isProfesstional);
 
         try {
-            customerService.addCustumer(newCustomer);
+            customerService.addCustomer(newCustomer);
             scanner.nextLine();
         }catch (Exception e) {
             e.printStackTrace();
         }
+        return Optional.ofNullable(newCustomer);
     }
 
     public static void displayCard(Customer customer) {
@@ -96,7 +76,7 @@ public class CostumerView {
 
         System.out.printf("| Name      : %-"+ (cardWidth - 14) + "s |\n", customer.getCustomerName());
         System.out.printf("| Address   : %-"+ (cardWidth - 14) + "s |\n", customer.getAddress());
-        System.out.printf("| Status    : %-"+ (cardWidth - 14) + "s |\n", customer.getProfessional());
+        System.out.printf("| Professional : %-"+ (cardWidth - 17) + "s |\n", customer.getProfessional() ? "Oui" : "Non");
 
         System.out.println("+" + "-".repeat(cardWidth) + "+");
     }

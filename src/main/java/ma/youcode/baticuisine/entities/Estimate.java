@@ -8,6 +8,7 @@ public class Estimate {
     private LocalDateTime issueAt;
     private LocalDateTime validateDate ;
     private Boolean isAccepted;
+    public Estimate(){}
 
     public Boolean getAccepted() {
         return isAccepted;
