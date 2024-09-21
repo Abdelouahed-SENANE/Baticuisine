@@ -40,4 +40,8 @@ public abstract class Component {
     public void setVat(Double vat) {
         this.vat = vat;
     }
+
+
+
+
 }

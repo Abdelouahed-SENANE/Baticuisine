@@ -1,32 +1,43 @@
 package ma.youcode.baticuisine.entities;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public class Estimate {
 
-    private String estimateId;
-    private LocalDateTime issueAt;
-    private LocalDateTime validateDate ;
+    private UUID estimateId;
+    private LocalDate issueAt;
+    private LocalDate validateAt ;
     private Boolean isAccepted;
+    private Project project;
     public Estimate(){}
+
+    public void setProject(Project project) {
+        this.project = project;
+    }
+
+    public Project getProject() {
+        return project;
+    }
 
     public Boolean getAccepted() {
         return isAccepted;
     }
 
-    public LocalDateTime getIssueAt() {
+    public LocalDate getIssueAt() {
         return issueAt;
     }
 
-    public LocalDateTime getValidateDate() {
-        return validateDate;
+    public LocalDate getValidateAt() {
+        return validateAt;
     }
 
-    public String getEstimateId() {
+    public UUID getEstimateId() {
         return estimateId;
     }
 
-    public void setEstimateId(String estimateId) {
+    public void setEstimateId(UUID estimateId) {
         this.estimateId = estimateId;
     }
 
@@ -34,11 +45,11 @@ public class Estimate {
         isAccepted = accepted;
     }
 
-    public void setValidateDate(LocalDateTime validateDate) {
-        this.validateDate = validateDate;
+    public void setValidateAt(LocalDate validateAt) {
+        this.validateAt = validateAt;
     }
 
-    public void setIssueAt(LocalDateTime issueAt) {
+    public void setIssueAt(LocalDate issueAt) {
         this.issueAt = issueAt;
     }
 }

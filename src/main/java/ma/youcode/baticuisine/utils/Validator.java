@@ -1,5 +1,8 @@
 package ma.youcode.baticuisine.utils;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
@@ -49,6 +52,24 @@ public class Validator {
         }
     }
 
+    public static LocalDate validDate(String fieldName) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        while (true) {
+            System.out.print("Veuillez entrer " + fieldName + " (yyyy-mm-dd) : ");
+            String input = scanner.nextLine();
+
+            try {
+                LocalDate date = LocalDate.parse(input, formatter);
+                if (date.isBefore(LocalDate.now())) {
+                    System.out.println("La date saisie est dépassée. Veuillez entrer une date future.");
+                    continue;
+                }
+                return date;
+            } catch (DateTimeParseException e) {
+                System.out.println("Date invalide. Veuillez réessayer.");
+            }
+        }
+    }
 
     public static Boolean validBoolean(String fieldName) {
         while (true) {
