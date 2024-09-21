@@ -32,7 +32,6 @@ public class CostumerView {
         System.out.println("| 2. Ajouter un nouveau client      |");
         System.out.println("| 3. Revenir au menu précédent      |");
         System.out.println("|___________________________________|");
-        System.out.print(" Entrez votre choix : ");
         return  ChoiceOption.getChoice(4);
     }
 
@@ -42,7 +41,12 @@ public class CostumerView {
         String customerName = Validator.validField("nom du client recherche", "[A-Za-z ]+");
         Optional<Customer> customer = customerService.getCustomerByName(customerName);
         customer.ifPresentOrElse(CostumerView::displayCard, () -> System.out.println("Client non trouve"));
-
+        if (!customer.isPresent()) {
+            Boolean response = Validator.validBoolean("est ce que vous pouvez ajouter nouveau client");
+            if (response) {
+                createCustomer();
+            }
+        }
         return customer;
     }
 
@@ -58,13 +62,14 @@ public class CostumerView {
         newCustomer.setPhone(customerPhone);
         newCustomer.setProfessional(isProfesstional);
 
+
         try {
-            customerService.addCustomer(newCustomer);
-            scanner.nextLine();
+            Optional<Customer> customer = customerService.addCustomer(newCustomer);
+            return customer;
         }catch (Exception e) {
             e.printStackTrace();
         }
-        return Optional.ofNullable(newCustomer);
+        return Optional.empty();
     }
 
     public static void displayCard(Customer customer) {

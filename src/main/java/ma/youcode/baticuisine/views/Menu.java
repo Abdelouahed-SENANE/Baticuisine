@@ -1,24 +1,33 @@
 package ma.youcode.baticuisine.views;
 
+import ma.youcode.baticuisine.dto.InvoiceDTO;
 import ma.youcode.baticuisine.entities.*;
-import ma.youcode.baticuisine.enums.ProjectStatus;
 import ma.youcode.baticuisine.enums.WorkForceType;
+import ma.youcode.baticuisine.services.EstimateService;
 import ma.youcode.baticuisine.services.ProjectService;
+import ma.youcode.baticuisine.services.implementations.EstimateServiceImp;
 import ma.youcode.baticuisine.services.implementations.ProjectServiceImp;
 import ma.youcode.baticuisine.utils.ChoiceOption;
+import ma.youcode.baticuisine.utils.InvoicePrinter;
+import ma.youcode.baticuisine.utils.TablePrinter;
 import ma.youcode.baticuisine.utils.Validator;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
+import java.util.UUID;
 
 public class Menu {
     private static Scanner scanner;
     private int option;
     private static ProjectService projectService;
+    private  static EstimateService estimateService;
     private Optional<Customer> currentCustomer;
     static {
         scanner = new Scanner(System.in);
         projectService = new ProjectServiceImp();
+        estimateService = new EstimateServiceImp();
     }
 
     public Menu run(Menu menu) {
@@ -30,6 +39,7 @@ public class Menu {
                         createProject();
                         break;
                     case 2:
+                        displayAllProjects();
                         break;
                      case 4:
                          System.out.println("Merci d'avoir utilisé l'application. À bientôt !");
@@ -55,7 +65,6 @@ public class Menu {
         System.out.println("| 3. Calculer le coût d'un projet   |");
         System.out.println("| 4. Quitter                        |");
         System.out.println("|___________________________________|");
-        System.out.print(" Entrez votre choix : ");
         option = ChoiceOption.getChoice(4);
     }
 
@@ -95,7 +104,18 @@ public class Menu {
             newProject.setProjectName(projectName);
             newProject.setSurface(suraface);
 
-            collectComponents(newProject);
+            if (customer.getProfessional()) {
+                System.out.println("Le client est professionnel, application de la remise.");
+                Double discount = Validator.validDouble("le taux de la remise");
+                newProject.setDiscount(discount);
+            }else {
+                newProject.setDiscount(0.00);
+            }
+
+            System.out.println("+++++ Ajout des matériaux +++++");
+            collectMaterials(newProject);
+            collectWorkforce(newProject);
+            System.out.println("+++++ Calcul du coût total +++++");
 
             Boolean isVat = Validator.validBoolean("Souhaitez-vous appliquer une TVA au projet ? (oui/non) : ");
             if (isVat) {
@@ -103,64 +123,112 @@ public class Menu {
                 for (Component component : newProject.getComponents()) {
                     component.setVat(vat);
                 }
+            }else{
+                for (Component component : newProject.getComponents()) {
+                    component.setVat(0.00);
+                }
             }
 
             Boolean isProfit = Validator.validBoolean("Souhaitez-vous appliquer une marge bénéficiaire au projet ? (oui/non) : ");
             if (isProfit) {
-                Double profitMargin = Validator.validDouble("la marge bénéficiaire");
+                Double profitMargin = Validator.validCoeffcient("la marge bénéficiaire coefficient");
                 newProject.setProfitMargin(profitMargin);
+            }else {
+                newProject.setProfitMargin(0.00);
             }
-            projectService.addProject(newProject);
+
+            System.out.println("Calcul du coût en cours...");
+            InvoiceDTO invoice = estimateService.generateInvoice(newProject);
+            InvoicePrinter.print(invoice);
+
+            Boolean saveDevis = Validator.validBoolean("Souhaitez-vous enregistrer le devis ? (oui/non)");
+            if (saveDevis) {
+                Estimate estimate = new Estimate();
+                LocalDate issueDate = Validator.validDate("la date d'émission");
+                LocalDate validateDate = Validator.validDate("la date de validité");
+                if (issueDate.isAfter(validateDate)) {
+                    System.out.println("Erreur : la date de validation doit être supérieure à la date d'émission.");
+                    validateDate = Validator.validDate("la date de validité");
+                }
+
+                estimate.setIssueAt(issueDate);
+
+                estimate.setValidateAt(validateDate);
+                Boolean accepted = Validator.validBoolean("Le client a-t-il accepté le prix du devis ? (oui/non) : ");
+                if (accepted) {
+                    estimate.setAccepted(true);
+                }else {
+                    estimate.setAccepted(false);
+                }
+
+                UUID projectId =  projectService.addProject(newProject);
+                newProject.setProjectId(projectId);
+                estimate.setProject(newProject);
+                this.estimateService.addEstimate(estimate);
+                System.out.println("Devis enregistré avec succès !");
+            }else {
+                System.out.println("Échec de l'enregistrement du devis !");
+            }
         } else {
             System.out.println("client non trouve");
         }
 
     }
 
-    public void collectComponents(Project project) {
-        System.out.println("+++++ Ajout des Composants +++++");
+    public void collectWorkforce(Project project) {
         while (true) {
-            Boolean addComponent = Validator.validBoolean("Souhaitez-vous ajouter un composant ? (oui/non)");
+            String workforceName = Validator.validField("le nom de la main-d'œuvre", null);
+            Double hourlyRate = Validator.validDouble("le taux horaire de cette main-d'œuvre (€/h)");
+            Double workHours = Validator.validDouble("le nombre d'heures travaillées");
+            WorkForceType workForceType = Validator.choiceEnum(WorkForceType.class);
+            Double workerProductivityCoefficient = Validator.validCoeffcient("le facteur de productivité");
+            WorkForce workForce = new WorkForce();
+            workForce.setComponentName(workforceName);
+            workForce.setHourlyRate(hourlyRate);
+            workForce.setWorkHours(workHours);
+            workForce.setWorkForceType(workForceType);
+            workForce.setWorkerProductivityCoefficient(workerProductivityCoefficient);
+            project.addComponent(workForce);
+            System.out.println("Main-d'œuvre ajoutée avec succès !");
+            Boolean addComponent = Validator.validBoolean("Souhaitez-vous ajouter autre main-d'œuvre ? (oui/non)");
             if (addComponent) {
-                boolean componentType = Validator.validQuestion("Quel type de composant voulez-vous ajouter ? (1 ---> Matériel, 2 ---> Travailleur)");
-                if (componentType) {
-                    String materialName = Validator.validField("le nom du matériau", null);
-                    Double quantity = Validator.validDouble("la quantité de ce matériau (en litres)");
-                    Double pricePerUnit = Validator.validDouble("le coût unitaire de ce matériau (€/litre)");
-                    Double transportCost = Validator.validDouble("le coût de transport de ce matériau (€)");
-                    Double qualityCoefficient = Validator.validCoeffcient("le coefficient de qualité du matériau (entre 1.0 et 2) : ");
+                System.out.println("Continue ...");
+            } else {
+                break;
+            }
+        }
+    }
 
-                    Material material = new Material();
-                    material.setComponentName(materialName);
-                    material.setQuantity(quantity);
-                    material.setPricePerUnit(pricePerUnit);
-                    material.setTransportationCost(transportCost);
-                    material.setQualityCoefficient(qualityCoefficient);
-                    project.addComponent(material);
-                    System.out.println("Matériau ajouté avec succès !");
-                } else {
-                    String workforceName = Validator.validField("le nom du travailleur", null);
-                    Double hourlyRate = Validator.validDouble("le taux horaire de cette main-d'œuvre (€/h)");
-                    Double workHours = Validator.validDouble("le nombre d'heures travaillées");
-                    WorkForceType workForceType = Validator.choiceEnum(WorkForceType.class);
-                    Double workerProductivityCoefficient = Validator.validCoeffcient("le facteur de productivité");
-
-                    WorkForce workForce = new WorkForce();
-                    workForce.setComponentName(workforceName);
-                    workForce.setHourlyRate(hourlyRate);
-                    workForce.setWorkHours(workHours);
-                    workForce.setWorkForceType(workForceType);
-                    workForce.setWorkerProductivityCoefficient(workerProductivityCoefficient);
-
-                    project.addComponent(workForce);
-                    System.out.println("Main-d'œuvre ajoutée avec succès !");
-                }
+    public void collectMaterials(Project project) {
+        while (true) {
+            String materialName = Validator.validField("le nom du matériau", null);
+            Double quantity = Validator.validDouble("la quantité de ce matériau (en litres)");
+            Double pricePerUnit = Validator.validDouble("le coût unitaire de ce matériau (€/litre)");
+            Double transportCost = Validator.validDouble("le coût de transport de ce matériau (€)");
+            Double qualityCoefficient = Validator.validCoeffcient("le coefficient de qualité du matériau (entre 1.0 et 2) : ");
+            Material material = new Material();
+            material.setComponentName(materialName);
+            material.setQuantity(quantity);
+            material.setPricePerUnit(pricePerUnit);
+            material.setTransportationCost(transportCost);
+            material.setQualityCoefficient(qualityCoefficient);
+            project.addComponent(material);
+            System.out.println("Matériau ajouté avec succès !");
+            Boolean response = Validator.validBoolean("Souhaitez-vous ajouter autre Matériel ? (oui/non)");
+            if (response) {
+                System.out.println("Continue ...");
             } else {
                 break;
             }
 
-
         }
     }
 
+    public void displayAllProjects() {
+
+        List<Project> projects = this.projectService.getAllProjects();
+
+        TablePrinter.printProjects(projects);
+
+    }
 }

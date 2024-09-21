@@ -6,6 +6,6 @@ import java.util.Optional;
 
 public interface CustomerService {
 
-    void addCustomer(Customer customer);
+    Optional<Customer> addCustomer(Customer customer);
     Optional<Customer> getCustomerByName(String customerName);
 }
