@@ -14,8 +14,25 @@ public class Project {
     private Customer customer;
     private Double surface;
     private List<Component> components = new ArrayList<>();
-
+    private Double discount;
+    private Estimate estimate;
     public Project(){}
+
+    public Double getDiscount() {
+        return discount;
+    }
+
+    public Estimate getEstimate() {
+        return estimate;
+    }
+
+    public void setEstimate(Estimate estimate) {
+        this.estimate = estimate;
+    }
+
+    public void setDiscount(Double discount) {
+        this.discount = discount;
+    }
 
     public void setSurface(Double surface) {
         this.surface = surface;

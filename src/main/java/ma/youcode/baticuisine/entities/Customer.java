@@ -1,10 +1,11 @@
 package ma.youcode.baticuisine.entities;
 
 import java.util.List;
+import java.util.UUID;
 
 public class Customer {
 
-    private String customerId;
+    private UUID customerId;
     private String customerName;
     private String address;
     private String phone;
@@ -22,7 +23,7 @@ public class Customer {
         return address;
     }
 
-    public String getCustomerId() {
+    public UUID getCustomerId() {
         return customerId;
     }
 
@@ -38,7 +39,7 @@ public class Customer {
         this.address = address;
     }
 
-    public void setCustomerId(String customerId) {
+    public void setCustomerId(UUID customerId) {
         this.customerId = customerId;
     }
 
