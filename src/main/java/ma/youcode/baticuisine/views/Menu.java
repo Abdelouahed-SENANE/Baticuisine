@@ -2,6 +2,7 @@ package ma.youcode.baticuisine.views;
 
 import ma.youcode.baticuisine.dto.InvoiceDTO;
 import ma.youcode.baticuisine.entities.*;
+import ma.youcode.baticuisine.enums.ComponentType;
 import ma.youcode.baticuisine.enums.WorkForceType;
 import ma.youcode.baticuisine.services.EstimateService;
 import ma.youcode.baticuisine.services.ProjectService;
@@ -30,6 +31,18 @@ public class Menu {
         estimateService = new EstimateServiceImp();
     }
 
+    private void view() {
+        System.out.println(" ___________________________________");
+        System.out.println("|           Menu Principal          |");
+        System.out.println("|___________________________________|");
+        System.out.println("|                                   |");
+        System.out.println("| 1. Créer un nouveau projet        |");
+        System.out.println("| 2. Voir les projets existants     |");
+        System.out.println("| 3. Calculer le coût d'un projet   |");
+        System.out.println("| 4. Quitter                        |");
+        System.out.println("|___________________________________|");
+        option = ChoiceOption.getChoice(4);
+    }
     public Menu run(Menu menu) {
 
         do {
@@ -39,8 +52,11 @@ public class Menu {
                         createProject();
                         break;
                     case 2:
-                        displayAllProjects();
+                        displayProjects();
                         break;
+                    case 3:
+                        calculateProjectCost();
+                    break;
                      case 4:
                          System.out.println("Merci d'avoir utilisé l'application. À bientôt !");
                          System.exit(0);
@@ -55,18 +71,6 @@ public class Menu {
     }
 
 
-    private void view() {
-        System.out.println(" ___________________________________");
-        System.out.println("|           Menu Principal          |");
-        System.out.println("|___________________________________|");
-        System.out.println("|                                   |");
-        System.out.println("| 1. Créer un nouveau projet        |");
-        System.out.println("| 2. Voir les projets existants     |");
-        System.out.println("| 3. Calculer le coût d'un projet   |");
-        System.out.println("| 4. Quitter                        |");
-        System.out.println("|___________________________________|");
-        option = ChoiceOption.getChoice(4);
-    }
 
     private Optional<Customer> getCustomerForProject() {
         int option = CostumerView.view();
@@ -185,6 +189,7 @@ public class Menu {
             WorkForce workForce = new WorkForce();
             workForce.setComponentName(workforceName);
             workForce.setHourlyRate(hourlyRate);
+            workForce.setComponentType(ComponentType.WorkForce);
             workForce.setWorkHours(workHours);
             workForce.setWorkForceType(workForceType);
             workForce.setWorkerProductivityCoefficient(workerProductivityCoefficient);
@@ -210,6 +215,7 @@ public class Menu {
             material.setComponentName(materialName);
             material.setQuantity(quantity);
             material.setPricePerUnit(pricePerUnit);
+            material.setComponentType(ComponentType.Material);
             material.setTransportationCost(transportCost);
             material.setQualityCoefficient(qualityCoefficient);
             project.addComponent(material);
@@ -224,11 +230,20 @@ public class Menu {
         }
     }
 
-    public void displayAllProjects() {
-
-        List<Project> projects = this.projectService.getAllProjects();
-
-        TablePrinter.printProjects(projects);
+    public void displayProjects() {
 
     }
+
+    public void calculateProjectCost() {
+        List<Project> projects = this.projectService.getAllProjects();
+        TablePrinter.printProjects(projects);
+
+        int i = Validator.selectIndex(projects);
+
+        System.out.println("Calcul du coût en cours...");
+        InvoiceDTO invoice = estimateService.generateInvoice(projects.get(i));
+        InvoicePrinter.print(invoice);
+
+    }
+
 }

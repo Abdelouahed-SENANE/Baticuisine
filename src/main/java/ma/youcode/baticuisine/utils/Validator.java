@@ -1,9 +1,12 @@
 package ma.youcode.baticuisine.utils;
 
+import ma.youcode.baticuisine.entities.Project;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.InputMismatchException;
+import java.util.List;
 import java.util.Scanner;
 
 public class Validator {
@@ -166,4 +169,26 @@ public class Validator {
         }
     }
 
+    public static int selectIndex(List<?> data) {
+
+        while (true) {
+            try{
+                System.out.print("Sélectionnez le nombre de projet que vous souhaitez calculer : ");
+                int index = scanner.nextInt() - 1;
+
+                if (index < 0 || index >= data.size()) {
+                    System.out.println("Le nombre que vous avez choisi est hors de portée.");
+                    continue;
+                }
+
+                return index;
+
+            }catch (Exception e){
+                System.out.println("Une erreur est survenue. Veuillez réessayer.");
+                scanner.next();
+            }
+
+        }
+
+    }
 }

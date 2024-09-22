@@ -1,21 +1,31 @@
 package ma.youcode.baticuisine.entities;
 
+import ma.youcode.baticuisine.enums.ComponentType;
+
 import java.util.UUID;
 
 public abstract class Component {
 
-    private String componentId;
+    private UUID componentId;
     private String componentName;
     private Project project;
     private Double vat;
-
+    private ComponentType componentType;
     public Component(){}
-    public String getComponentId() {
+    public UUID getComponentId() {
         return componentId;
     }
 
     public void setProject(Project project) {
         this.project = project;
+    }
+
+    public ComponentType getComponentType() {
+        return componentType;
+    }
+
+    public void setComponentType(ComponentType componentType) {
+        this.componentType = componentType;
     }
 
     public Project getProject() {
@@ -29,7 +39,7 @@ public abstract class Component {
         return componentName;
     }
 
-    public void setComponentId(String componentId) {
+    public void setComponentId(UUID componentId) {
         this.componentId = componentId;
     }
 

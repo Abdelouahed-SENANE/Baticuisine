@@ -14,7 +14,7 @@ public class MaterialRepositoryimp implements MaterialRepository {
     public MaterialRepositoryimp() {}
     @Override
     public void save(Material material) {
-        String SQL = "insert into materials (component_name , vat , price_per_unit , quantity, transportation_cost, quality_coefficient, project_id) VALUES (? , ? , ? , ? , ? , ? , ?)";
+        String SQL = "insert into materials (component_name , vat , price_per_unit , quantity, transportation_cost, quality_coefficient, project_id , component_type) VALUES (? , ? , ? , ? , ? , ? , ?, ?)";
         try(PreparedStatement pstmt = connection.prepareStatement(SQL);){
 
             pstmt.setString(1, material.getComponentName());
@@ -24,7 +24,7 @@ public class MaterialRepositoryimp implements MaterialRepository {
             pstmt.setDouble(5, material.getTransportationCost());
             pstmt.setDouble(6, material.getQualityCoefficient());
             pstmt.setObject(7 , material.getProject().getProjectId() , Types.OTHER);
-
+            pstmt.setObject(8 , material.getComponentType(), Types.OTHER);
             pstmt.executeUpdate();
 
         }catch (SQLException e){

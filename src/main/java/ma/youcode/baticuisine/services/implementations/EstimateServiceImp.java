@@ -33,6 +33,7 @@ public class EstimateServiceImp implements EstimateService {
 
         Double amountHT = totalAmountWorkforces + totalAmountMaterials;
         Double discountValue = amountHT * project.getDiscount() / 100;
+
         Double netAmount = amountHT - discountValue;
         Double tax = project.getComponents().get(0).getVat();
         Double amountTax = netAmount * (tax / 100);

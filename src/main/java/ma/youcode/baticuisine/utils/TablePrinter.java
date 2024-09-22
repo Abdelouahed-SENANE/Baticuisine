@@ -10,23 +10,34 @@ public class TablePrinter {
 
     private static final Map<Class<?>, StringFormatter> CUSTOM_FORMATTERS = new HashMap<>();
 
-    public static void printProjects( List<?> data) {
+    public static void printProjects(List<?> data) {
         try {
             String[] headers = {
-                    "projectId", "projectName", "profitMargin", "projectStatus", "customer.customerName",
-                    "customer.address", "customer.professional" ,"estimate.issueAt" , "estimate.validateAt"
+                    "No", "projectName", "profitMargin", "projectStatus",
+                    "customer.customerName", "customer.address", "customer.professional",
+                    "estimate.issueAt", "estimate.validateAt"
             };
-
 
             int[] columnWidths = calculateColumnWidths(headers, data);
             printFormattedHeader(headers, columnWidths);
 
-            for (Object item : data) {
-                String[] rowData = extractData(item, headers);
+            for (int i = 0; i < data.size(); i++) {
+                Object item = data.get(i);
+                String[] rowData = new String[headers.length];
+
+                // Add the index (1-based)
+                rowData[0] = String.valueOf(i + 1);
+
+                for (int j = 1; j < headers.length; j++) {
+                    String header = headers[j];
+                    Object value = getFieldValue(item, header);
+                    rowData[j] = formatValue(value);
+                }
+
                 printFormattedRow(rowData, columnWidths);
             }
-            printSeparatorLine(columnWidths);
 
+            printSeparatorLine(columnWidths);
             System.out.println("\n(" + data.size() + " row(s))\n");
 
         } catch (Exception e) {
@@ -34,6 +45,7 @@ public class TablePrinter {
             e.printStackTrace();
         }
     }
+
 
     private static int[] calculateColumnWidths(String[] headers, List<?> data) {
         int[] columnWidths = new int[headers.length];
@@ -97,6 +109,9 @@ public class TablePrinter {
 
     public static Object getFieldValue(Object item, String fieldName) {
         try {
+            if (fieldName.equals("No")) {
+                return null;
+            }
             return getPropertyOrField(item, fieldName);
         } catch (RuntimeException e) {
             throw new RuntimeException("Error accessing field or property: " + fieldName, e);
