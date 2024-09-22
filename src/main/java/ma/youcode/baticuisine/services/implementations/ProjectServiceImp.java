@@ -15,6 +15,7 @@ import ma.youcode.baticuisine.services.ProjectService;
 import ma.youcode.baticuisine.services.WorkForceService;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class ProjectServiceImp implements ProjectService {
@@ -55,5 +56,10 @@ public class ProjectServiceImp implements ProjectService {
     @Override
     public List<Project> getAllProjects() {
         return this.projectRepository.findAll();
+    }
+
+    @Override
+    public Optional<Project> getProjectById(UUID id) {
+        return this.projectRepository.findById(id);
     }
 }
