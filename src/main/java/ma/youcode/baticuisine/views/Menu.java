@@ -231,7 +231,8 @@ public class Menu {
     }
 
     public void displayProjects() {
-
+        List<Project> projects = this.projectService.getAllProjects();
+        TablePrinter.printProjects(projects);
     }
 
     public void calculateProjectCost() {
