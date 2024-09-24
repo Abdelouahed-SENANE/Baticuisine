@@ -1,4 +1,4 @@
-##### BatiCuisine - Aperçu du projet d'application d'estimation de coûts de construction de cuisines
+# BatiCuisine - Aperçu du projet d'application d'estimation de coûts de construction de cuisines
 
 BatiCuisine est une application Java conçue pour les professionnels de la construction et de la rénovation de cuisines. Elle propose une interface intuitive pour estimer le coût total d'un projet, incluant les coûts des matériaux et les frais de main-d'œuvre. Cette application simplifie la gestion de projets en prenant en charge les détails des clients, en générant des estimations de coûts, et en offrant une vue d'ensemble financière des projets de rénovation.
 
