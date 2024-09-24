@@ -9,6 +9,9 @@ import ma.youcode.baticuisine.services.EstimateService;
 import ma.youcode.baticuisine.services.MaterialService;
 import ma.youcode.baticuisine.services.WorkForceService;
 
+import java.util.Optional;
+import java.util.UUID;
+
 public class EstimateServiceImp implements EstimateService {
     private final WorkForceService workForceService;
     private final MaterialService materialService;
@@ -53,5 +56,10 @@ public class EstimateServiceImp implements EstimateService {
                 netAmount
         );
 
+    }
+
+    @Override
+    public Optional<Estimate> getEstimateByProjectId(UUID id) {
+        return this.estimateRepository.findByProjectId(id);
     }
 }

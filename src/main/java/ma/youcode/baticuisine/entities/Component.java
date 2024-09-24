@@ -1,7 +1,5 @@
 package ma.youcode.baticuisine.entities;
 
-import ma.youcode.baticuisine.enums.ComponentType;
-
 import java.util.UUID;
 
 public abstract class Component {
@@ -10,7 +8,6 @@ public abstract class Component {
     private String componentName;
     private Project project;
     private Double vat;
-    private ComponentType componentType;
     public Component(){}
     public UUID getComponentId() {
         return componentId;
@@ -20,13 +17,6 @@ public abstract class Component {
         this.project = project;
     }
 
-    public ComponentType getComponentType() {
-        return componentType;
-    }
-
-    public void setComponentType(ComponentType componentType) {
-        this.componentType = componentType;
-    }
 
     public Project getProject() {
         return project;

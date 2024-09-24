@@ -17,7 +17,7 @@ public class WorkForceRepositoryImp implements WorkForceRepository {
     public WorkForceRepositoryImp(){}
     @Override
     public void save(WorkForce workForce) {
-        String SQL = "insert into workforces (component_name , vat , hourly_rate , work_hours, worker_productivity_coefficient, project_id, workforce_type , component_type) VALUES (?, ?, ?, ?, ?, ? , ? , ?)";
+        String SQL = "insert into workforces (component_name , vat , hourly_rate , work_hours, worker_productivity_coefficient, project_id, workforce_type ) VALUES (?, ?, ?, ?, ?, ? , ? )";
         try(PreparedStatement pstmt = connection.prepareStatement(SQL);){
 
             pstmt.setString(1, workForce.getComponentName());
@@ -27,7 +27,6 @@ public class WorkForceRepositoryImp implements WorkForceRepository {
             pstmt.setDouble(5, workForce.getWorkerProductivityCoefficient());
             pstmt.setObject(6 , workForce.getProject().getProjectId() , Types.OTHER);
             pstmt.setObject(7, workForce.getWorkForceType() , Types.OTHER);
-            pstmt.setObject(8, workForce.getComponentType(), Types.OTHER);
             pstmt.executeUpdate();
 
         }catch (SQLException e){

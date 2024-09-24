@@ -62,4 +62,19 @@ public class ProjectServiceImp implements ProjectService {
     public Optional<Project> getProjectById(UUID id) {
         return this.projectRepository.findById(id);
     }
+
+    @Override
+    public void deleteProject(UUID id) {
+        System.out.println(id.toString());
+        Optional<Project> project = this.projectRepository.findById(id);
+        if (project.isPresent()) {
+            this.projectRepository.delete(id);
+            System.out.println("Le projet a ete supprimer");
+        }
+    }
+
+    @Override
+    public void updateProject(Project project) {
+        this.projectRepository.update(project);
+    }
 }

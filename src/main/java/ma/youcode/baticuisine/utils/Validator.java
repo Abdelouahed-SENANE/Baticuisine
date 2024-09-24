@@ -1,11 +1,8 @@
 package ma.youcode.baticuisine.utils;
 
-import ma.youcode.baticuisine.entities.Project;
-
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -100,27 +97,6 @@ public class Validator {
         }
     }
 
-    public static Boolean validQuestion(String fieldName) {
-        while (true) {
-            try{
-                System.out.print( fieldName + " : ");
-                Integer input = scanner.nextInt();
-
-                if (input == null) {
-                    System.out.println("La saisie ne peut pas être vide. Veuillez réessayer.");
-                    continue;
-                }
-                if (input <= 0 || input > 2) {
-                    System.out.println("La valeur saisie doit être 1 ou 2. Veuillez réessayer.");
-                    continue;
-                }
-                scanner.nextLine();
-                return (input == 1) ? true : false;
-            }catch (Exception e){
-                System.out.println("Une erreur est survenue. Veuillez réessayer.");
-            }
-        }
-    }
     public static Double validCoeffcient(String fieldName) {
         while (true) {
             try{
@@ -169,26 +145,59 @@ public class Validator {
         }
     }
 
-    public static int selectIndex(List<?> data) {
+    public static int selectIndex(List<?> data , String prompt) {
 
         while (true) {
             try{
-                System.out.print("Sélectionnez le nombre de projet que vous souhaitez calculer : ");
+                System.out.print(prompt);
                 int index = scanner.nextInt() - 1;
 
                 if (index < 0 || index >= data.size()) {
                     System.out.println("Le nombre que vous avez choisi est hors de portée.");
                     continue;
                 }
-
+                scanner.nextLine();
                 return index;
 
             }catch (Exception e){
                 System.out.println("Une erreur est survenue. Veuillez réessayer.");
-                scanner.next();
+                scanner.nextLine();
             }
 
         }
 
+    }
+
+    public static String stringDefaultVal(String field, String defaultValue) {
+        while (true) {
+            System.out.println("Valeur précédente de " + field + " : " + defaultValue);
+            System.out.print("Modifier " + field + " ? (Appuyez sur Entrée pour conserver la valeur précédente) : ");
+            String input = scanner.nextLine();
+
+            if (input.isEmpty()) {
+                return defaultValue;
+            }
+
+            return input;
+        }
+    }
+
+    public static Double doubleDefaultVal(String field, Double defaultValue) {
+        while (true) {
+            System.out.println("Valeur précédente de " + field + " : " + defaultValue);
+            System.out.print("Modifier " + field + " ? (Appuyez sur Entrée pour conserver la valeur précédente) : ");
+            String input = scanner.nextLine().trim();
+
+            if (input.isEmpty()) {
+                return defaultValue;  // Return default value if input is empty
+            }
+
+            try {
+                Double value = Double.parseDouble(input);
+                return value;
+            } catch (NumberFormatException e) {
+                System.out.println("Erreur : Veuillez entrer une valeur numérique valide.");
+            }
+        }
     }
 }

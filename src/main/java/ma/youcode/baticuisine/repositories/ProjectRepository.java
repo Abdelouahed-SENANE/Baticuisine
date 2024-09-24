@@ -12,4 +12,6 @@ public interface ProjectRepository {
     UUID save(Project project);
     List<Project> findAll();
     Optional<Project> findById(UUID id);
+    void delete(UUID id);
+    void update(Project project);
 }

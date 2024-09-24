@@ -11,4 +11,6 @@ public interface ProjectService {
     UUID addProject(Project project);
     List<Project> getAllProjects();
     Optional<Project> getProjectById(UUID id);
+    void updateProject(Project project);
+    void deleteProject(UUID id);
 }

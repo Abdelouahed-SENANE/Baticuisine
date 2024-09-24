@@ -24,25 +24,29 @@ public class InvoicePrinter {
         printLine(tableWidth);
 
         for (MaterialDTO material : invoice.getMaterials()) {
-            System.out.printf("| %-38s | %-10s | %-15s | %-10s | %-10s | %-15s |\n",
-                    material.getName() + " (Material)",
-                    material.getQuantity() + " m²",
-                    String.format("%.2f €/m²", material.getPriceUnit()),
-                    material.getQuality() ,
-                    String.format("%.2f €", material.getTransportCost()),
-                    String.format("%.2f €", material.getAmountHT())
-                    );
+            if (material instanceof  MaterialDTO) {
+                System.out.printf("| %-38s | %-10s | %-15s | %-10s | %-10s | %-15s |\n",
+                        material.getName() + " (material)",
+                        material.getQuantity() + " m²",
+                        String.format("%.2f €/m²", material.getPriceUnit()),
+                        material.getQuality() ,
+                        String.format("%.2f €", material.getTransportCost()),
+                        String.format("%.2f €", material.getAmountHT())
+                );
+            }
 
         }
 
         for (WorkForceDTO workForce : invoice.getWorkForces()) {
-            System.out.printf("| %-38s | %-10s | %-15s | %-10s | %-10s | %-15s |\n",
-                    workForce.getName() + " (Main d'oeuvre)",
-                    workForce.getWorkHours() + " h",
-                    String.format("%.2f €/h", workForce.getHourlyRate()),
-                    workForce.getWorkerProductivityCoefficient(),
-                    String.format("-", "-"),
-                    String.format("%.2f €", workForce.getAmountHT()));
+           if (workForce instanceof  WorkForceDTO) {
+               System.out.printf("| %-38s | %-10s | %-15s | %-10s | %-10s | %-15s |\n",
+                       workForce.getName() + " (mo)",
+                       workForce.getWorkHours() + " h",
+                       String.format("%.2f €/h", workForce.getHourlyRate()),
+                       workForce.getWorkerProductivityCoefficient(),
+                       String.format("-", "-"),
+                       String.format("%.2f €", workForce.getAmountHT()));
+           }
         }
         printLine(tableWidth);
         Double profitRate = invoice.getProfitRate() > 0 ? Math.round((invoice.getProfitRate() - 1 ) * 100) : 0.00;
@@ -56,7 +60,6 @@ public class InvoicePrinter {
         printLine(tableWidth);
     }
 
-    // Helper methods to print lines and centered text
     private static void printLine(int width) {
         System.out.println("+" + "-".repeat(width - 2) + "+");
     }

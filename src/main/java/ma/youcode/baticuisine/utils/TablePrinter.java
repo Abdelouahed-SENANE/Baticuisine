@@ -1,10 +1,11 @@
 package ma.youcode.baticuisine.utils;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.sql.Timestamp;
 
 public class TablePrinter {
 
@@ -16,6 +17,42 @@ public class TablePrinter {
                     "No", "projectName", "profitMargin", "projectStatus",
                     "customer.customerName", "customer.address", "customer.professional",
                     "estimate.issueAt", "estimate.validateAt"
+            };
+
+            int[] columnWidths = calculateColumnWidths(headers, data);
+            printFormattedHeader(headers, columnWidths);
+
+            for (int i = 0; i < data.size(); i++) {
+                Object item = data.get(i);
+                String[] rowData = new String[headers.length];
+
+                // Add the index (1-based)
+                rowData[0] = String.valueOf(i + 1);
+
+                for (int j = 1; j < headers.length; j++) {
+                    String header = headers[j];
+                    Object value = getFieldValue(item, header);
+                    rowData[j] = formatValue(value);
+                }
+
+                printFormattedRow(rowData, columnWidths);
+            }
+
+            printSeparatorLine(columnWidths);
+            System.out.println("\n(" + data.size() + " row(s))\n");
+
+        } catch (Exception e) {
+            System.err.println("Error displaying data: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    public static void printAllCustomer(List<?> data) {
+        try {
+            String[] headers = {
+                    "No", "customerName", "address", "phone",
+                    "professional"
+
             };
 
             int[] columnWidths = calculateColumnWidths(headers, data);

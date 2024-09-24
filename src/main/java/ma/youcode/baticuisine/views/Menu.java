@@ -2,16 +2,12 @@ package ma.youcode.baticuisine.views;
 
 import ma.youcode.baticuisine.dto.InvoiceDTO;
 import ma.youcode.baticuisine.entities.*;
-import ma.youcode.baticuisine.enums.ComponentType;
 import ma.youcode.baticuisine.enums.WorkForceType;
 import ma.youcode.baticuisine.services.EstimateService;
 import ma.youcode.baticuisine.services.ProjectService;
 import ma.youcode.baticuisine.services.implementations.EstimateServiceImp;
 import ma.youcode.baticuisine.services.implementations.ProjectServiceImp;
-import ma.youcode.baticuisine.utils.ChoiceOption;
-import ma.youcode.baticuisine.utils.InvoicePrinter;
-import ma.youcode.baticuisine.utils.TablePrinter;
-import ma.youcode.baticuisine.utils.Validator;
+import ma.youcode.baticuisine.utils.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -24,7 +20,6 @@ public class Menu {
     private int option;
     private static ProjectService projectService;
     private  static EstimateService estimateService;
-    private Optional<Customer> currentCustomer;
     static {
         scanner = new Scanner(System.in);
         projectService = new ProjectServiceImp();
@@ -39,9 +34,12 @@ public class Menu {
         System.out.println("| 1. Créer un nouveau projet        |");
         System.out.println("| 2. Voir les projets existants     |");
         System.out.println("| 3. Calculer le coût d'un projet   |");
-        System.out.println("| 4. Quitter                        |");
+        System.out.println("| 4. Éditer un projet               |");
+        System.out.println("| 5. Supprimer un projet            |");
+        System.out.println("| 6. Accéder au menu du client      |");
+        System.out.println("| 7. Quitter                        |");
         System.out.println("|___________________________________|");
-        option = ChoiceOption.getChoice(4);
+        option = ChoiceOption.getChoice(7);
     }
     public Menu run(Menu menu) {
 
@@ -49,6 +47,7 @@ public class Menu {
             view();
             switch (option) {
                     case 1:
+                        CustomerMenu.existCustomer();
                         createProject();
                         break;
                     case 2:
@@ -57,45 +56,90 @@ public class Menu {
                     case 3:
                         calculateProjectCost();
                     break;
-                     case 4:
+                case 4:
+                    handleUpdateProject();
+                    break;
+                case 5:
+                    handleDeleteProject();
+                    break;
+                case 6:
+                    CustomerMenu.CustomerMenu(menu);
+                    break;
+                case 7:
                          System.out.println("Merci d'avoir utilisé l'application. À bientôt !");
                          System.exit(0);
                         break;
                 default:
                     System.out.print("Option invalide. Veuillez réessayer : ");
             }
-        }while (option != 4);
+        }while (option != 7);
 
         return menu;
 
     }
 
+    public void handleUpdateProject() {
+        List<Project> projects = projectService.getAllProjects();
+        TablePrinter.printProjects(projects);
+        int index = Validator.selectIndex(projects , "Sélectionnez le nombre de projet que vous souhaitez editer : ");
+        UUID projectId = projects.get(index).getProjectId();
+        Optional<Project> optionalProject = projectService.getProjectById(projectId);
 
-
-    private Optional<Customer> getCustomerForProject() {
-        int option = CostumerView.view();
-        switch (option) {
-            case 1:
-                currentCustomer = CostumerView.existCustomer();
-                break;
-            case 2:
-                currentCustomer = CostumerView.createCustomer();
-                break;
-            case 3:
-                System.out.println("Retour au menu précédent...");
-                break;
-            default:
-                System.out.println("Option invalide. Veuillez réessayer.");
+        if (optionalProject.isPresent()) {
+            Project getProject = optionalProject.get();
+            Project editProject = createEditProject(getProject);
+            projectService.updateProject(editProject);
+            System.out.println("Projet mis à jour avec succès !");
+        } else {
+            System.out.println("Projet n'existe pas !");
         }
-        return currentCustomer;
+    }
+
+
+    private Project createEditProject(Project getProject) {
+        Project editProject = new Project();
+
+        editProject.setProjectId(getProject.getProjectId());
+
+        System.out.println("++++ Modification du Projet Existant ++++");
+
+        String projectName = Validator.stringDefaultVal("le nom de projet", getProject.getProjectName());
+        editProject.setProjectName(projectName);
+
+        Double profitMargin = Validator.doubleDefaultVal("la marge bénéficiaire", getProject.getProfitMargin());
+        editProject.setProfitMargin(profitMargin);
+
+        if (getProject.getCustomer().getProfessional()) {
+            Double discount = Validator.doubleDefaultVal("la remise", getProject.getDiscount());
+            editProject.setDiscount(discount);
+        } else {
+            editProject.setDiscount(0.00);
+        }
+
+        return editProject;
+    }
+
+
+
+
+
+    public void handleDeleteProject() {
+        List<Project> projects = this.projectService.getAllProjects();
+        TablePrinter.printProjects(projects);
+        int i = Validator.selectIndex(projects , "Sélectionnez le nombre de projet que vous souhaitez supprimer : ");
+
+        projectService.deleteProject(projects.get(i).getProjectId());
     }
 
     public void createProject() {
-        Optional<Customer> customerOptional = getCustomerForProject();
+        Optional<Customer> customerOptional = Cache.getAuthUser();
+        String costumerName = customerOptional.isPresent() ? customerOptional.get().getCustomerName() : "";
         if (customerOptional.isPresent()) {
             Customer customer = customerOptional.get();
-            boolean response = Validator.validBoolean("Souhaitez-vous continuer avec ce client ? (oui/non) : ");
+
+            boolean response = Validator.validBoolean("Souhaitez-vous continuer avec ce client "+ costumerName.toUpperCase() + " (oui/non)");
             if (!response) {
+                Cache.setAuthUser(null);
                 System.out.println("Retour au menu principal...");
                 return;
             }
@@ -145,38 +189,43 @@ public class Menu {
             InvoiceDTO invoice = estimateService.generateInvoice(newProject);
             InvoicePrinter.print(invoice);
 
-            Boolean saveDevis = Validator.validBoolean("Souhaitez-vous enregistrer le devis ? (oui/non)");
-            if (saveDevis) {
-                Estimate estimate = new Estimate();
-                LocalDate issueDate = Validator.validDate("la date d'émission");
-                LocalDate validateDate = Validator.validDate("la date de validité");
-                if (issueDate.isAfter(validateDate)) {
-                    System.out.println("Erreur : la date de validation doit être supérieure à la date d'émission.");
-                    validateDate = Validator.validDate("la date de validité");
-                }
-
-                estimate.setIssueAt(issueDate);
-
-                estimate.setValidateAt(validateDate);
-                Boolean accepted = Validator.validBoolean("Le client a-t-il accepté le prix du devis ? (oui/non) : ");
-                if (accepted) {
-                    estimate.setAccepted(true);
-                }else {
-                    estimate.setAccepted(false);
-                }
-
-                UUID projectId =  projectService.addProject(newProject);
+            UUID projectId = projectService.addProject(newProject);
+            if (projectId != null) {
                 newProject.setProjectId(projectId);
-                estimate.setProject(newProject);
-                this.estimateService.addEstimate(estimate);
-                System.out.println("Devis enregistré avec succès !");
-            }else {
-                System.out.println("Échec de l'enregistrement du devis !");
+                createEstimate(newProject);
             }
+
         } else {
             System.out.println("client non trouve");
         }
 
+    }
+
+    public void createEstimate(Project project) {
+        Boolean saveDevis = Validator.validBoolean("Souhaitez-vous enregistrer le devis ? (oui/non)");
+        if (saveDevis) {
+            Estimate estimate = new Estimate();
+            LocalDate issueDate = Validator.validDate("la date d'émission");
+            LocalDate validateDate = Validator.validDate("la date de validité");
+            if (issueDate.isAfter(validateDate)) {
+                System.out.println("Erreur : la date de validation doit être supérieure à la date d'émission.");
+                validateDate = Validator.validDate("la date de validité");
+            }
+
+            estimate.setIssueAt(issueDate);
+            estimate.setValidateAt(validateDate);
+            Boolean accepted = Validator.validBoolean("Le client a-t-il accepté le prix du devis ? (oui/non) : ");
+            if (accepted) {
+                estimate.setAccepted(true);
+            } else {
+                estimate.setAccepted(false);
+            }
+            estimate.setProject(project);
+            this.estimateService.addEstimate(estimate);
+            System.out.println("Devis enregistré avec succès !");
+        } else {
+            System.out.println("l'enregistrement du devis a ete annule !");
+        }
     }
 
     public void collectWorkforce(Project project) {
@@ -189,7 +238,6 @@ public class Menu {
             WorkForce workForce = new WorkForce();
             workForce.setComponentName(workforceName);
             workForce.setHourlyRate(hourlyRate);
-            workForce.setComponentType(ComponentType.WorkForce);
             workForce.setWorkHours(workHours);
             workForce.setWorkForceType(workForceType);
             workForce.setWorkerProductivityCoefficient(workerProductivityCoefficient);
@@ -215,7 +263,6 @@ public class Menu {
             material.setComponentName(materialName);
             material.setQuantity(quantity);
             material.setPricePerUnit(pricePerUnit);
-            material.setComponentType(ComponentType.Material);
             material.setTransportationCost(transportCost);
             material.setQualityCoefficient(qualityCoefficient);
             project.addComponent(material);
@@ -239,12 +286,19 @@ public class Menu {
         List<Project> projects = this.projectService.getAllProjects();
         TablePrinter.printProjects(projects);
 
-        int i = Validator.selectIndex(projects);
-
-        System.out.println("Calcul du coût en cours...");
-        InvoiceDTO invoice = estimateService.generateInvoice(projects.get(i));
-        InvoicePrinter.print(invoice);
-
+        int i = Validator.selectIndex(projects , "Sélectionnez le nombre de projet que vous souhaitez calculer : ");
+        UUID projectId = projects.get(i).getProjectId();
+        Optional<Estimate> existCustomer = estimateService.getEstimateByProjectId(projectId);
+        if (existCustomer.isPresent()) {
+            System.out.println("Calcul du coût en cours...");
+            InvoiceDTO invoice = estimateService.generateInvoice(projects.get(i));
+            InvoicePrinter.print(invoice);
+        } else {
+            String yellow = "\u001B[33m";
+            String reset = "\u001B[0m";
+            System.out.println("\n" + yellow + "      Alerte ! Ce projet n'a pas encore de devis.\n" + reset);
+            createEstimate(projects.get(i));
+        }
     }
 
 }

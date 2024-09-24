@@ -2,7 +2,6 @@ package ma.youcode.baticuisine.repositories.implementations;
 
 import ma.youcode.baticuisine.config.Database;
 import ma.youcode.baticuisine.entities.*;
-import ma.youcode.baticuisine.enums.ComponentType;
 import ma.youcode.baticuisine.enums.ProjectStatus;
 import ma.youcode.baticuisine.enums.WorkForceType;
 import ma.youcode.baticuisine.repositories.ProjectRepository;
@@ -45,13 +44,13 @@ public class ProjectRepositoryImp implements ProjectRepository {
     @Override
     public List<Project> findAll() {
         Map<UUID, Project> projects = new HashMap<>();
-        String query = "SELECT p.*,cu.* , e.*, c.*,m.*, w.*  " +
+        String query = "SELECT c.*, p.* , e.* , m.* , w.* , cu.*" +
                 "FROM projects p " +
                 "INNER JOIN customers cu ON cu.customer_id = p.owner_customer_id " +
-                "INNER JOIN estimates e ON e.project_id = p.project_id " +
-                "LEFT JOIN materials m ON m.project_id = p.project_id " +
-                "LEFT JOIN workforces w ON w.project_id = p.project_id " +
-                "LEFT JOIN components c ON (m.component_id = c.component_id OR w.component_id = c.component_id) " +
+                "LEFT JOIN estimates e ON e.project_id = p.project_id " +
+                "LEFT JOIN components c ON c.project_id = p.project_id " +
+                "LEFT JOIN materials m ON c.component_id = m.component_id " +
+                "LEFT JOIN workforces w ON w.component_id = c.component_id " +
                 "ORDER BY p.project_id";
 
         try (PreparedStatement pstmt = connection.prepareStatement(query);
@@ -59,12 +58,14 @@ public class ProjectRepositoryImp implements ProjectRepository {
             while (rs.next()) {
                 UUID projectId = rs.getObject("project_id", UUID.class);
                 Project project = projects.computeIfAbsent(projectId, id -> getProject(rs));
+                Double transportCost = rs.getDouble("transportation_cost");
+                Double worksHours =rs.getDouble("work_hours");
 
-                ComponentType componentType = ComponentType.valueOf(rs.getString("component_type"));
-                if (componentType.equals(ComponentType.valueOf("Material"))) {
+
+                if ( transportCost != 0.00 ) {
                     Material material = getMaterial(rs);
                     project.addComponent(material);
-                }else if (componentType.equals(ComponentType.valueOf("WorkForce"))) {
+                }else if (worksHours != 0.00) {
                     WorkForce workForce = getWorkForce(rs);
                     project.addComponent(workForce);
                 }
@@ -75,75 +76,33 @@ public class ProjectRepositoryImp implements ProjectRepository {
         return new ArrayList<>(projects.values());
     }
 
-
-
     @Override
     public Optional<Project> findById(UUID id) {
-//        Project project = null;
-//        String query = "SELECT p.*,co.* , e.*, c.*,m.*, w.* "
-//                + "FROM projects p "
-//                + "INNER JOIN customers co ON co.customer_id = p.owner_customer_id "
-//                + "INNER JOIN estimates e ON e.project_id = p.project_id " +
-//                " INNER JOIN components c ON c.project_id = p.project_id "
-//                + "LEFT JOIN materials m ON m.project_id = p.project_id "
-//                + "LEFT JOIN workforces w ON w.project_id = p.project_id "
-//                + "WHERE p.project_id = ?";
-//        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
-//            pstmt.setObject(1, id);
-//            ResultSet rs = pstmt.executeQuery();
-//
-//            if (rs.next()) {
-//                // Create project and customer
-//                project = new Project();
-//                project.setProjectId(rs.getObject("project_id", UUID.class));
-//                project.setProjectName(rs.getString("project_name"));
-//                project.setProfitMargin(rs.getDouble("profit_margin"));
-//                project.setDiscount(rs.getDouble("discount"));
-//                project.setProjectStatus(ProjectStatus.valueOf(rs.getString("project_status")));
-//
-//                Customer customer = new Customer();
-//                customer.setCustomerId(rs.getObject("customer_id", UUID.class));
-//                customer.setCustomerName(rs.getString("customer_name"));
-//                customer.setAddress(rs.getString("address"));
-//                customer.setProfessional(rs.getBoolean("is_professional"));
-//                project.setCustomer(customer);
-//
-//                // Create estimate
-//                Estimate estimate = new Estimate();
-//                estimate.setEstimateId(rs.getObject("estimate_id", UUID.class));
-//                estimate.setIssueAt(rs.getObject("issue_at", LocalDate.class));
-//                estimate.setValidateAt(rs.getObject("validate_at", LocalDate.class));
-//                project.setEstimate(estimate);
-//
-//                do {
-//                    if (rs.getDouble("quantity") != 0) {
-//                        Material material = new Material();
-//                        material.setQualityCoefficient(rs.getDouble("quality_coefficient"));
-//                        material.setQuantity(rs.getDouble("quantity"));
-//                        material.setPricePerUnit(rs.getDouble("price_per_unit"));
-//                        material.setComponentName(rs.getString("component_name"));
-//                        material.setVat(rs.getDouble("vat"));
-//                        material.setTransportationCost(rs.getDouble("transportation_cost"));
-//                        material.setComponentId(rs.getObject("component_id", UUID.class));
-//                        project.addComponent(material);
-//                    } else if (rs.getDouble("hourly_rate") != 0) {
-//                        WorkForce workforce = new WorkForce();
-//                        workforce.setWorkerProductivityCoefficient(rs.getDouble("worker_productivity_coefficient"));
-//                        workforce.setWorkHours(rs.getDouble("work_hours"));
-//                        workforce.setHourlyRate(rs.getDouble("hourly_rate"));
-//                        workforce.setComponentName(rs.getString("component_name"));
-//                        workforce.setVat(rs.getDouble("vat"));
-//                        workforce.setWorkForceType(WorkForceType.valueOf(rs.getString("workforce_type")));
-//                        workforce.setComponentId(rs.getObject("component_id", UUID.class));
-//                        project.addComponent(workforce);
-//                    }
-//                } while (rs.next());
-//            }
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//
-        return Optional.empty();
+        String QUERY = "SELECT * FROM projects p " +
+                "INNER JOIN customers c ON c.customer_id = p.owner_customer_id" +
+                " WHERE project_id = ?";
+        Project project = null;
+        try(PreparedStatement pstmt = connection.prepareStatement(QUERY)) {
+            pstmt.setObject(1 , id);
+            pstmt.executeQuery();
+            ResultSet rs = pstmt.getResultSet();
+            if (rs.next()) {
+                project = new Project();
+                project.setProjectId(rs.getObject("project_id", UUID.class));
+                project.setProjectName(rs.getString("project_name"));
+                project.setProfitMargin(rs.getDouble("profit_margin"));
+                project.setProjectStatus(ProjectStatus.valueOf(rs.getString("project_status")));
+                project.setDiscount(rs.getDouble("discount"));
+                Customer customer = new Customer();
+                customer.setCustomerId(rs.getObject("customer_id" , UUID.class));
+                customer.setCustomerName(rs.getString("customer_name"));
+                customer.setProfessional(rs.getBoolean("is_professional"));
+                project.setCustomer(customer);
+            }
+        }catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return Optional.ofNullable(project);
     }
 
     private Project getProject(ResultSet rs) {
@@ -187,7 +146,7 @@ public class ProjectRepositoryImp implements ProjectRepository {
             return material;
         } catch (SQLException e) {
             e.printStackTrace();
-            return null; // Handle nulls as needed
+            return null;
         }
     }
 
@@ -204,7 +163,33 @@ public class ProjectRepositoryImp implements ProjectRepository {
             return workforce;
         } catch (SQLException e) {
             e.printStackTrace();
-            return null; // Handle nulls as needed
+            return null;
+        }
+    }
+
+
+    @Override
+    public void delete(UUID id) {
+        String SQL = "DELETE FROM projects WHERE project_id = ?";
+        try(PreparedStatement pstmt = connection.prepareStatement(SQL)) {
+            pstmt.setObject(1, id);
+            pstmt.executeUpdate();
+        }catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void update(Project project) {
+        String SQL = "UPDATE projects SET project_name = ? , profit_margin = ?, discount = ? where project_id = ?";
+        try(PreparedStatement pstmt = connection.prepareStatement(SQL)) {
+            pstmt.setObject(4 , project.getProjectId());
+            pstmt.setDouble(2 , project.getProfitMargin());
+            pstmt.setDouble(3 , project.getDiscount());
+            pstmt.setObject(1 , project.getProjectName());
+            pstmt.executeUpdate();
+        }catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 }
